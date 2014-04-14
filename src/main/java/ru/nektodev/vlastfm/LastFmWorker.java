@@ -15,18 +15,22 @@ import java.util.List;
 public class LastFmWorker implements Runnable {
 
     private String username;
+    private int artistCount;
+    private int tracksCount;
     private ArrayList<Track> tracks;
 
-    public LastFmWorker(String username) {
+    public LastFmWorker(String username, int artistCount, int tracksCount) {
         this.username = username;
+        this.artistCount = artistCount;
+        this.tracksCount = tracksCount;
     }
 
     @Override
     public void run() {
-        ArrayList<Artist> topArtistByUser = (ArrayList<Artist>) LastFmService.getTopArtistByUser(username, 1);
+        ArrayList<Artist> topArtistByUser = (ArrayList<Artist>) LastFmService.getTopArtistByUser(username, artistCount);
         tracks = new ArrayList<>();
         for (Artist artist : topArtistByUser) {
-            tracks.addAll(LastFmService.getTopTrackByArtist(artist, 10));
+            tracks.addAll(LastFmService.getTopTrackByArtist(artist, tracksCount));
         }
     }
 

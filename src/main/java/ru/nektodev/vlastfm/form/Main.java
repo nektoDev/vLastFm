@@ -24,6 +24,8 @@ public class Main extends JFrame{
     private JButton closeBtn;
     private JButton searchBtn;
     private JLabel lastFmUsernameLabel;
+    private JSpinner artistCount;
+    private JSpinner trackCount;
 
     public static void main() {
         JFrame frame = new JFrame("Main");
@@ -34,6 +36,9 @@ public class Main extends JFrame{
     }
 
     public Main() throws HeadlessException {
+
+        this.artistCount.setValue(10);
+        this.trackCount.setValue(50);
 
         closeBtn.addActionListener(new ActionListener() {
             @Override
@@ -56,7 +61,7 @@ public class Main extends JFrame{
      * get theirs top tracks and download them from VK
      */
     private void searchBtnAction() {
-        LastFmWorker worker = new LastFmWorker(this.lastFmUsername.getText());
+        LastFmWorker worker = new LastFmWorker(this.lastFmUsername.getText(), (Integer) artistCount.getValue(), (Integer) trackCount.getValue());
         worker.run();
 
         ExecutorService pool = Executors.newFixedThreadPool(10);

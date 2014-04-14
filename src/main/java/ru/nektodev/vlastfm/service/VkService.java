@@ -29,7 +29,7 @@ public class VkService {
     /**
      * Method to find download URL on VK.com
      *
-     * @param query query to search track. Typically looks like Atrtis - Track
+     * @param query query to search track. Typically looks like Artist - Track
      *
      * @return url string
      */
@@ -40,7 +40,6 @@ public class VkService {
         try {
 
             long timeLast = System.currentTimeMillis() - lastCallTime;
-            System.out.println(350 - timeLast);
             if (timeLast < 350) {
                 Thread.sleep(350 - timeLast);
             }
@@ -107,7 +106,6 @@ public class VkService {
             }
 
         }
-        System.out.println(maxBpm);
         return maxURL;
     }
 
