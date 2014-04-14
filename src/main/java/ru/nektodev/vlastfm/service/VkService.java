@@ -3,6 +3,7 @@ package ru.nektodev.vlastfm.service;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -21,9 +22,9 @@ import java.net.URLEncoder;
 public class VkService {
 
     //TODO remove access token
-    public static final String ACCESS_TOKEN = "b7e28a0bcaee17302bf7237fa8b75579bb5c832984c9d9d572ed867811530e534917cbec7982dcf8b4b0d";
+    public static final String ACCESS_TOKEN = "a10ae9759ff882ec6df6fe45bb1f65dbfdcbd840a6298b7aa88dab700e610edbbcc7f9484fa13a33379f7";
 
-    //TODO Максимальное качество
+    public static Long lastCallTime = 0L;
 
     /**
      * Method to find download URL on VK.com
@@ -37,17 +38,23 @@ public class VkService {
 
         DefaultHttpClient httpClient = new DefaultHttpClient();
         try {
-            //TODO sleep needed time, not CONST
-            Thread.sleep(350);
+
+            long timeLast = System.currentTimeMillis() - lastCallTime;
+            System.out.println(350 - timeLast);
+            if (timeLast < 350) {
+                Thread.sleep(350 - timeLast);
+            }
 
             //TODO make more readable and add more params
             HttpGet getRequest = new HttpGet(
                     "https://api.vk.com/method/audio.search?access_token=" + ACCESS_TOKEN +
                             "&q=" + URLEncoder.encode(query) +
-                            "&auto_complete=1&lyrics=0&performer_only=0&sort=2&search_own=0&offset=0&count=1&v=5.16");
+                            "&auto_complete=1&lyrics=0&performer_only=0&sort=2&search_own=0&offset=0&count=10&v=5.16");
             getRequest.addHeader("accept", "application/json");
 
             HttpResponse response = httpClient.execute(getRequest);
+
+            lastCallTime = System.currentTimeMillis();
 
             if (response.getStatusLine().getStatusCode() != 200) {
                 throw new RuntimeException("Failed : HTTP error code : "
@@ -59,9 +66,8 @@ public class VkService {
 
             String output;
             StringBuffer result = new StringBuffer();
-            System.out.println("Output from Server .... \n");
+
             while ((output = br.readLine()) != null) {
-                System.out.println(output);
                 result.append(output);
             }
             JSONObject o = new JSONObject(result.toString());
@@ -69,7 +75,10 @@ public class VkService {
             //TODO add another response types
             long count = o.optJSONObject("response").optLong("count");
             if (count != 0) {
-                return o.optJSONObject("response").optJSONArray("items").optJSONObject(0).optString("url");
+
+                JSONArray responseItems = o.optJSONObject("response").optJSONArray("items");
+                URL maxURL = getUrlWithMaxSize(responseItems);
+                return maxURL.toString();
             } else {
                 return "";
             }
@@ -83,5 +92,24 @@ public class VkService {
         }
         return "";
     }
+
+    private static URL getUrlWithMaxSize(JSONArray responseItems) throws IOException {
+        long maxBpm = 0;
+        URL maxURL = null;
+        for (int i = 0; i<responseItems.length() && maxBpm < 300; i++) {
+            JSONObject item = responseItems.getJSONObject(i);
+            URL tryURL = new URL(item.optString("url"));
+            long bpm = tryURL.openConnection().getContentLengthLong()/item.optLong("duration")*8/1000;
+
+            if (bpm > maxBpm) {
+                maxBpm = bpm;
+                maxURL = tryURL;
+            }
+
+        }
+        System.out.println(maxBpm);
+        return maxURL;
+    }
+
 
 }

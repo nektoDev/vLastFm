@@ -23,10 +23,10 @@ public class LastFmWorker implements Runnable {
 
     @Override
     public void run() {
-        ArrayList<Artist> topArtistByUser = (ArrayList<Artist>) LastFmService.getTopArtistByUser(username, 100);
+        ArrayList<Artist> topArtistByUser = (ArrayList<Artist>) LastFmService.getTopArtistByUser(username, 1);
         tracks = new ArrayList<>();
         for (Artist artist : topArtistByUser) {
-            tracks.addAll(LastFmService.getTopTrackByArtist(artist, 50));
+            tracks.addAll(LastFmService.getTopTrackByArtist(artist, 10));
         }
     }
 
