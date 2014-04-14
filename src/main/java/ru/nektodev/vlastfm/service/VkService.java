@@ -14,54 +14,37 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 
 /**
- * Created by Viacheslav on 27.03.2014.
+ * Service to work with VK.com API
+ *
+ * @author nektodev
  */
 public class VkService {
 
-    private final String USER_AGENT = "Mozilla/5.0";
-
+    //TODO remove access token
     public static final String ACCESS_TOKEN = "b7e28a0bcaee17302bf7237fa8b75579bb5c832984c9d9d572ed867811530e534917cbec7982dcf8b4b0d";
 
-    // HTTP GET request
-    private void sendGet() throws Exception {
+    //TODO Максимальное качество
 
-        String url = "https://api.vk.com/method/audio.search?access_token=" + ACCESS_TOKEN + "&q=Сплин - Романс&auto_complete=1&lyrics=0&performer_only=0&sort=2&search_own=0&offset=0&count=1&v=5.16";
-
-        URL obj = new URL(URLDecoder.decode(url, "ISO-8859-1"));
-        HttpsURLConnection con = (HttpsURLConnection) obj.openConnection();
-
-        // optional default is GET
-        con.setRequestMethod("GET");
-        con.getResponseMessage();
-        int responseCode = con.getResponseCode();
-        System.out.println("\nSending 'GET' request to URL : " + obj.toString());
-        System.out.println("Response Code : " + responseCode);
-        System.out.println("\nResponse Message : " + con.getResponseMessage());
-
-        BufferedReader in = new BufferedReader(
-                new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-
-        //print result
-        System.out.println(response.toString());
-
-    }
-//TODO Максимальное качество
-
+    /**
+     * Method to find download URL on VK.com
+     *
+     * @param query query to search track. Typically looks like Atrtis - Track
+     *
+     * @return url string
+     */
+    //TODO make more readable. Split it!
     public static synchronized String getURL(String query) {
 
         DefaultHttpClient httpClient = new DefaultHttpClient();
         try {
+            //TODO sleep needed time, not CONST
             Thread.sleep(350);
 
+            //TODO make more readable and add more params
             HttpGet getRequest = new HttpGet(
-                    "https://api.vk.com/method/audio.search?access_token=" + ACCESS_TOKEN + "&q=" + URLEncoder.encode(query) + "&auto_complete=1&lyrics=0&performer_only=0&sort=2&search_own=0&offset=0&count=1&v=5.16");
+                    "https://api.vk.com/method/audio.search?access_token=" + ACCESS_TOKEN +
+                            "&q=" + URLEncoder.encode(query) +
+                            "&auto_complete=1&lyrics=0&performer_only=0&sort=2&search_own=0&offset=0&count=1&v=5.16");
             getRequest.addHeader("accept", "application/json");
 
             HttpResponse response = httpClient.execute(getRequest);
@@ -83,6 +66,7 @@ public class VkService {
             }
             JSONObject o = new JSONObject(result.toString());
 
+            //TODO add another response types
             long count = o.optJSONObject("response").optLong("count");
             if (count != 0) {
                 return o.optJSONObject("response").optJSONArray("items").optJSONObject(0).optString("url");

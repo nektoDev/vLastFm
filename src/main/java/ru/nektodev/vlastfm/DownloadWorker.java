@@ -13,7 +13,9 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- * Created by nektodev on 09.04.14.
+ * File downloader.
+ *
+ * @author nektodev
  */
 public class DownloadWorker implements Runnable {
 
@@ -25,6 +27,7 @@ public class DownloadWorker implements Runnable {
     @Override
     public void run() {
         try {
+            //Find download URL
             String url = VkService.getURL(track.getArtist() + " - " + track.getName());
 
             if (url == null || url.isEmpty()) {
@@ -44,6 +47,7 @@ public class DownloadWorker implements Runnable {
                 }
             }
 
+            //TODO get name from model
             File file = new File(artistDir.getAbsolutePath() + "/" + track.getArtist() + " - " + track.getName() + ".mp3");
 
             try {
@@ -60,7 +64,6 @@ public class DownloadWorker implements Runnable {
                         fos.close();
                     } catch (IOException e) {
                         //TODO
-
                     }
                 }
             }

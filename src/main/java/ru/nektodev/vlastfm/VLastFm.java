@@ -3,7 +3,9 @@ package ru.nektodev.vlastfm;
 import ru.nektodev.vlastfm.form.Main;
 
 /**
- * Created by nektodev on 03.04.14.
+ * Main class
+ *
+ * @author nektodev
  */
 public class VLastFm {
 
@@ -13,8 +15,5 @@ public class VLastFm {
                 Main.main();
             }
         });
-
-
-
     }
 }

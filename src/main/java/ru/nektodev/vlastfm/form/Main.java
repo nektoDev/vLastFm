@@ -13,7 +13,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by nektodev on 04.04.14.
+ * Main form
+ *
+ * @author nektodev
  */
 public class Main extends JFrame{
     private JTextPane textPane1;
@@ -43,22 +45,29 @@ public class Main extends JFrame{
         searchBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                LastFmWorker worker = new LastFmWorker("nektodev");
-                worker.run();
-
-                ExecutorService pool = Executors.newFixedThreadPool(10);
-                for (Track track : worker.getTracks()) {
-                    pool.submit(new DownloadWorker(track));
-                }
-                pool.shutdown();
-                try {
-                    pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-
-
+                searchBtnAction();
             }
         });
+    }
+
+
+    /**
+     * Search button action listener. Search user's top artists,
+     * get theirs top tracks and download them from VK
+     */
+    private void searchBtnAction() {
+        LastFmWorker worker = new LastFmWorker("nektodev");
+        worker.run();
+
+        ExecutorService pool = Executors.newFixedThreadPool(10);
+        for (Track track : worker.getTracks()) {
+            pool.submit(new DownloadWorker(track));
+        }
+        pool.shutdown();
+        try {
+            pool.awaitTermination(Long.MAX_VALUE, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
     }
 }

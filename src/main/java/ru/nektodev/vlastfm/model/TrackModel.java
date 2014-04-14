@@ -5,7 +5,11 @@ import de.umass.lastfm.Track;
 import java.net.URL;
 
 /**
+ * Model track class. Consists lastFM track model and download URL
+ *
  * @author nektodev
+ * @see java.net.URL
+ * @see de.umass.lastfm.Track
  */
 public class TrackModel {
 

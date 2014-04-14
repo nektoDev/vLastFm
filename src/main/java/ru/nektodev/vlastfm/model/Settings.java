@@ -4,7 +4,9 @@ import java.io.File;
 import java.util.UUID;
 
 /**
- * Created by nektodev on 08.04.14.
+ * TODO
+ *
+ * @author nektodev
  */
 public enum Settings {
     INSTANCE;

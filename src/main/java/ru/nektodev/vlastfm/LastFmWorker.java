@@ -8,7 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by nektodev on 06.04.14.
+ * Worker to find Tracks on lastFM
+ *
+ * @author nektodev
  */
 public class LastFmWorker implements Runnable {
 
