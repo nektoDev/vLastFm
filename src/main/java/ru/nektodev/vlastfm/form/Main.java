@@ -56,7 +56,7 @@ public class Main extends JFrame{
      * get theirs top tracks and download them from VK
      */
     private void searchBtnAction() {
-        LastFmWorker worker = new LastFmWorker("nektodev");
+        LastFmWorker worker = new LastFmWorker(this.lastFmUsername.getText());
         worker.run();
 
         ExecutorService pool = Executors.newFixedThreadPool(10);
