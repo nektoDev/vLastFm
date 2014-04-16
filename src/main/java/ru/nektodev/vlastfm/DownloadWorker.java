@@ -1,7 +1,11 @@
 package ru.nektodev.vlastfm;
 
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.NotSupportedException;
+import com.mpatric.mp3agic.UnsupportedTagException;
 import de.umass.lastfm.Track;
 import ru.nektodev.vlastfm.model.Settings;
+import ru.nektodev.vlastfm.service.TagService;
 import ru.nektodev.vlastfm.service.VkService;
 
 import java.io.File;
@@ -28,7 +32,7 @@ public class DownloadWorker implements Runnable {
     public void run() {
         try {
             //Find download URL
-            String url = VkService.getURL(track.getArtist() + " - " + track.getName());
+            String url = VkService.getURL(track);
 
             if (url == null || url.isEmpty()) {
                 return;
@@ -39,22 +43,14 @@ public class DownloadWorker implements Runnable {
             ReadableByteChannel rbc = null;
             FileOutputStream fos = null;
 
-            File artistDir = new File(Settings.INSTANCE.getDestDir().getAbsolutePath() + "/" + track.getArtist());
-            if (!artistDir.exists()) {
-                boolean isOk = artistDir.mkdirs();
-                if (!isOk) {
-                    return; //TODO
-                }
-            }
-
-            //TODO get name from model
-            File file = new File(artistDir.getAbsolutePath() + "/" + track.getArtist() + " - " + track.getName() + ".mp3");
+            File file = new File(Settings.INSTANCE.getDestDir().getAbsolutePath() + "/" + track.getArtist() + " - " + track.getName() + ".mp3");
 
             try {
                 rbc = Channels.newChannel(trackUrl.openStream());
                 fos = new FileOutputStream(file);
 
                 fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+
             } catch (IOException e) {
                 e.printStackTrace(); //TODO
             } finally {
@@ -62,8 +58,17 @@ public class DownloadWorker implements Runnable {
                 if (fos != null) {
                     try {
                         fos.close();
+
+                        TagService.writeTags(file, track);
                     } catch (IOException e) {
                         //TODO
+                        e.printStackTrace();
+                    } catch (UnsupportedTagException e) {
+                        e.printStackTrace();
+                    } catch (InvalidDataException e) {
+                        e.printStackTrace();
+                    } catch (NotSupportedException e) {
+                        e.printStackTrace();
                     }
                 }
             }

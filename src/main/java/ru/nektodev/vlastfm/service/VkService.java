@@ -1,5 +1,6 @@
 package ru.nektodev.vlastfm.service;
 
+import de.umass.lastfm.Track;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -22,19 +23,23 @@ import java.net.URLEncoder;
 public class VkService {
 
     //TODO remove access token
-    public static final String ACCESS_TOKEN = "a10ae9759ff882ec6df6fe45bb1f65dbfdcbd840a6298b7aa88dab700e610edbbcc7f9484fa13a33379f7";
+    public static final String ACCESS_TOKEN = "16ae3f3599fe9dbb3ee78b79497a0ff650eb5606d72fc5f447629ed9c922d0113e80b56ff90347555b608";
 
     public static Long lastCallTime = 0L;
 
     /**
      * Method to find download URL on VK.com
      *
-     * @param query query to search track. Typically looks like Artist - Track
+     * @param track track to search . Typically looks like Artist - Track
      *
      * @return url string
+     *
+     * @see de.umass.lastfm.Track
      */
     //TODO make more readable. Split it!
-    public static synchronized String getURL(String query) {
+    public static synchronized String getURL(Track track) {
+
+        String query = track.getArtist() + " - " + track.getName();
 
         DefaultHttpClient httpClient = new DefaultHttpClient();
         try {
@@ -76,7 +81,7 @@ public class VkService {
             if (count != 0) {
 
                 JSONArray responseItems = o.optJSONObject("response").optJSONArray("items");
-                URL maxURL = getUrlWithMaxSize(responseItems);
+                URL maxURL = getUrlWithMaxSize(responseItems, track);
                 return maxURL.toString();
             } else {
                 return "";
@@ -92,17 +97,21 @@ public class VkService {
         return "";
     }
 
-    private static URL getUrlWithMaxSize(JSONArray responseItems) throws IOException {
+    private static URL getUrlWithMaxSize(JSONArray responseItems, Track track) throws IOException {
         long maxBpm = 0;
         URL maxURL = null;
         for (int i = 0; i<responseItems.length() && maxBpm < 300; i++) {
-            JSONObject item = responseItems.getJSONObject(i);
-            URL tryURL = new URL(item.optString("url"));
-            long bpm = tryURL.openConnection().getContentLengthLong()/item.optLong("duration")*8/1000;
 
-            if (bpm > maxBpm) {
-                maxBpm = bpm;
-                maxURL = tryURL;
+                JSONObject item = responseItems.getJSONObject(i);
+            if (track.getArtist().trim().equalsIgnoreCase(item.optString("artist").trim()) &&
+                    track.getName().trim().equalsIgnoreCase(item.optString("title").trim())) {
+                URL tryURL = new URL(item.optString("url"));
+                long bpm = tryURL.openConnection().getContentLengthLong()/item.optLong("duration")*8/1000;
+
+                if (bpm > maxBpm) {
+                    maxBpm = bpm;
+                    maxURL = tryURL;
+                }
             }
 
         }
